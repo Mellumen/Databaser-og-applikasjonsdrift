@@ -113,14 +113,8 @@ Installere noder og endret config:
 \item backup - done
 \end{itemize}
 
-
-
-
-
-%\chapter{Innledning}
-\section{Introduksjon} 
-\section{Ukesoppgaver 25. Januar}
-\subsection*{Oppgave 1}
+\section{Ukesoppgaver Nr. 2 - 25. Januar}
+\subsection{Oppgave 1}
 Vi jobbet mye med å finne ut hva som var gale med å lage en nøkkelbasert innlogging fra manager til de andre maskinene. Vi prøvde mange kombinasjoner, forskjellige lagringsplasser, med og uten passord, forskjellege -t -i++, og andre kombinasjoner. Til slutt fann vi ut at problemet var at vi hadde lagret key-ene i en egen separat mappe, men at den skulle ligge under en spesifikk key-mappe(default). Da fikk vi laget en key i gruppe7 og sendt public keyen til de andre maskinene. Etterpå fann vi ut at det var root som skulle ha key, og ikkje gruppe7, so da måtte vi lage en ny key som root. Da måtte  vi overwrite keyen i gruppe7. Vi brukte disse kodene, og vi har ingen passord:\\
 
   ssh-keygen -t rsa\\
@@ -133,7 +127,7 @@ En fordel med nøkkelbasert innlogging er at det gjør det mulig å logge seg in
 
 Ulempene med nøkkelbasert innlogging er at om noen føst kommer seg inn i systemet kan den enkelt bevege seg rundt mellom de forskjellige maskinene uten å måtte knekke et nytt passord for hver maskin.
 
-\subsection*{Oppgave 2}
+\subsection{Oppgave 2}
 Vi brukte kommandoen “uptime” og fekk dette resultatet:\\
 16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10\\
 
@@ -195,7 +189,7 @@ Resultatet såg slik ut:\\
 10.0.0.10:MemFree: &        1218144 kB
 \end{tabular}
 
-\subsection*{Oppgave 10}
+\subsection{Oppgave 10}
 Først prøvde vi å forstå dataane fra df -h, og prøvde å finne ut hvilken av linjene som representerte hvor mye plass det var ledig i serverene. Vi slet veldig med å finne ut hvordan grep fungerte på den måten at den skaffet bare dataane frå kolonne 4, dvs den kolonnen som het Avail. Vi brukte ofte manualen til grep, cut, awk og andre for å finne hint om hva vi kunne gjøre for å komme videre.\\
 
 Flere kodesnutter feilet som f.eks:\\
@@ -218,15 +212,6 @@ Slik ser resultatet ut:\\
 10.0.0.8: 4.2G\\
 10.0.0.9: 7.0G\\
 10.0.0.10:7.0G
-
-\section{Ukesoppgaver 08. Februar}
-
-\subsection*{Oppgave 1}
-Vi fulgte how-to videoen fra fronter og støtte ikke borti noe problemet. Det eneste vi gjorde anerledes var å laste bookface-fila opp på dropbox og brukte wget til å laste den ned bookface derfra via en public link:\\
- wget http://dl.dropbox.com/u/10542464/bookface-1.0.tar.gz
-
-
-%\clearpage
 
 \section{Ukesoppgaver Nr. 3 - 01. Februar}
 \subsection{Oppgave 1}
@@ -426,6 +411,12 @@ Ettersom vi ser på resultatet virker det som det er en indikasjon på hvor mye 
 
 Vi er usikker på om tallene vi får sier nøyaktig hvor mange annonser det finnes på siden, men man kan få en indikasjon på hvor mye reklame det er. Vi oppdaget at noen linker var tracking-baserte som bakgrunnskode basert på javascript. Vi antar at disse tracking-baserte resultatene kan hende var usynlige for den normale brukeren. I forhold til det vi først trudde, ved at kommandolinjen fann alle linjene på vg.no som inneholdt linker til andre nettsider, dvs poster, nyheter, mm., så er vi mer usikre nå. 
 
+\section{Ukesoppgaver Nr. 4 - 08. Februar}
+\subsection{Oppgave 1}
+Vi fulgte how-to videoen fra fronter og støtte ikke borti noe problemet. Det eneste vi gjorde anerledes var å laste bookface-fila opp på dropbox og brukte wget til å laste den ned bookface derfra via en public link:\\
+ wget http://dl.dropbox.com/u/10542464/bookface-1.0.tar.gz
+
+%\clearpage
 %\addcontentsline{toc}{section}{Referanser} %Add this section to content table
 %\bibliographystyle{unsrt} % change for dcu, or something else entirely? unsrt is nice !- referanser
 %\bibliography{Referanser}
