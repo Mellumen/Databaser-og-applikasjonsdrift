@@ -20,7 +20,7 @@
 %\usepackage{color, colortbl} %To use colors in tabulars
 
 
-
+\newcommand{\tab}{\hspace*{2em}}
 
 %Removes the indent:
 %\setlength\parindent{0pt}
@@ -52,7 +52,7 @@
 \tableofcontents % make table of contents
 \pagebreak	% and break the page, because pretty
 
-\section{Ukesoppgaver Nr. 1 - 18. januar}
+\section{Ukesoppgaver Nr. 1 - 18. Januar}
 \subsection{Oppgave 5}
 \begin{itemize}
 \item Vi installerte screen ganske greitt ved å følge retningslinjene i forelesingsfoilerne.
@@ -227,6 +227,205 @@ Vi fulgte how-to videoen fra fronter og støtte ikke borti noe problemet. Det en
 
 
 %\clearpage
+
+\section{Ukesoppgaver Nr. 3 - 01. Februar}
+\subsection{Oppgave 1}
+Vi installerte Apache og PHP på begge webserverene, ved å følge de retningslinjene i forelesingsfoileren. Vi passet på å være på webserverne da vi la inn apache og php.
+
+\subsection{Oppgave 2}
+Vi har testet ut om Apache fungerer ved å skrive fra manager:
+\begin{itemize}
+\item wget -q -O - http://10.0.0.3/
+\item wget -q -O - http://10.0.0.4/
+\end{itemize}
+Vi lagde en index.php fil under mappen /var/www i begge webserverne, og testet php ved hjelp av denne koden fra manager:
+\begin{itemize}
+\item wget -q -O - http://10.0.0.3/index.php
+\item wget -q -O - http://10.0.0.4/index.php
+\end{itemize}
+
+\subsection{Oppgave 3}
+\begin{enumerate}
+\item Vi følgte retningslinjene i forelesingsfoilerne.
+\item Først lagde vi en fil i www1 med denne koden: nano /etc/apache2/conf.d/status
+\item Deretter kopierte over informasjonen som skulle stå i fila, fra forelesingsfoileren.
+\item Så la vi til en apacheplugin i munin og installerte perl. Tilslutt restartet vi munin-noden.
+\item Deretter gjor vi det samme i www2.
+\end{enumerate}
+
+\subsection{Oppgave 4}
+Vi har installert pound på balancer ved å bruke: apt-get install pound
+Vi editerte så startup=1 i /etc/default/pound
+Og i konfigurasjonsfila /etc/pound/pound.cfg (nb: .cfg) la vi inn
+
+\begin{verbatim}
+ListenHTTP
+    Address 128.39.141.231
+    Port    80
+
+    ## allow PUT and DELETE also (by default only GET, POST and HEAD)?:\\
+    xHTTP    0
+    Service
+        BackEnd
+            Address 10.0.0.3
+            Port    80
+        End
+        BackEnd
+            Address 10.0.0.4
+            Port    80
+        End
+    End
+End
+\end{verbatim}
+
+Deretter lagde vi ein testfil: test.php i /var/www på både www1 og www2. Desse filane inneholder:
+\begin{verbatim} 
+<?php
+echo "your IP: " . $_SERVER['REMOTE_ADDR'] . " ";
+echo "served by: \"" . $_SERVER["SERVER_ADDR"] . "\"\n";
+?>
+\end{verbatim}
+
+Vi prøvde å kjøre disse testfilene ved bruk av koden:
+\begin{verbatim}
+	wget -O - -q http://128.39.141.231/test.php 
+\end{verbatim}
+Men test.php gav ingen resultat. Den gav blankt svar.
+
+Vi sendte epost til Kyrre Begnum og spurte om hva som var feil. Ved hjelp av svaret hans prøvde vi å teste direkte fra balancer om test.php virka på www1 og www2 ved hjelp av disse kodene:
+\begin{verbatim}
+wget -O - -q http://10.0.0.3/test.php
+wget -O - -q http://10.0.0.4/test.php
+\end{verbatim}
+
+De ga svarene:
+\begin{verbatim}
+your IP: 10.0.0.1 served by: "10.0.0.3"
+your IP: 10.0.0.1 served by: "10.0.0.4"
+\end{verbatim}
+
+Deretter sendte vi enda en epost til Kyrre Begnum, og fikk svar om at det var mest sannsynlig Pound i balancer som var feil. Etter anbefalinger fra Begnum prøvde vi:
+\begin{verbatim}
+ps aux | grep pound 
+\end{verbatim}
+og fikk resultatet:
+\begin{verbatim}
+gruppe7  23467  0.0  0.0   6288   596 pts/1    S+   10:30   0:00 grep pound
+\end{verbatim}
+
+Deretter prøvde vi igjen: wget -O - -q http://128.39.141.231/test.php for å sjekke kva resultat som vi fikk. Resultatet var det samme: ingen feilmeldinger, ingen resultat, og vi kom rett tilbake til kommandolinjen.
+
+Vi sendte en epost tilbake til Begnum med resultatet. Begnum svarte raskt at det var pound som ikke hadde startet, og anbefalte oss å bruke koden “service pound start” for å starte pound.
+
+Vi prøvde service pound start, men fikk error-beskjed om at cmd ikke kjente til kommandoen "service". Dermed letet vi litt på nettet og fant denne nettsiden:   https://help.ubuntu.com/community/Pound
+der vi forsto at vi kanskje måtte vere root for å starte pound, og vi prøvde denne koden:
+\begin{verbatim}
+/etc/init.d/pound start
+\end{verbatim}
+Da skjedde det noe. Det virka som om pound startet.
+
+Deretter prøvde vi: ps aux | grep pound, og fikk dette resultatet:
+\begin{verbatim}
+www-data 24416  0.0  0.1  34528   828 ?        Ss   10:47   0:00 /usr/sbin/pound
+www-data 24418  0.0  0.2  68328  1848 ?        Sl   10:47   0:00 /usr/sbin/pound
+root     24551  0.0  0.0   6288   596 pts/3    S+   10:47   0:00 grep pound
+\end{verbatim}
+Så prøvde vi i manager: wget -O - -q http://128.39.141.231/test.php, og fikk dette resultatet:
+\begin{verbatim}
+your IP: 10.0.0.1 served by: "10.0.0.4"
+\end{verbatim}
+Vi prøvde koden igjen og fikk: 
+\begin{verbatim}
+your IP: 10.0.0.1 served by: "10.0.0.3"
+\end{verbatim} 
+Disse to kommer annenhver gang fordi den balanserer belastninga på de to maskinene
+
+\subsection{Oppgave 5}
+Først installerte vi apache og rpaf modulet på manager slik det stod beskrevet i forelesningssliden. Så la vi til linjene fra sliden inn i apache sin http config fil, for deretter å restarte apache.
+
+\subsection{Oppgave 6}
+Vi prøvde å kode oppgaven først uten å bruke alias. Vi testet ut om hvilken kode vi måtte bruke for å slå av apache. Da vi fant det ut prøvde vi å teste ut om hvordan vi kunne skrive ut variabelnavn sammen med en tekst. Dette viste seg å ikke vere lett. Vi prøvde
+\begin{verbatim}
+for maskin in www1 www2; do printf “Stopper $maskin”
+for maskin in www1 www2; do printf “Stopper” $”maskin”; done
+\end{verbatim}
+Men disse gav bare error. Vi prøvde så med echo, der dette gav ønsket resultat.
+\begin{verbatim}
+for maskin in www1 www2; do echo Stopper $maskin; done
+\end{verbatim}
+  Resultat:     
+\begin{verbatim}
+Stopper www1
+Stopper www2
+\end{verbatim}
+
+Deretter prøvde vi å kombinere kodene og la de inn som alias. Dette førte til nye problem, for det å lage en tekst sammen med variabler som alias er ulikt dersom det ikke er alias. Vi måtte legge inn flere klaffer mm.
+
+Dette er koden vi endte opp med først:
+\begin{verbatim}
+alias stopApacheWebservers="for maskin in www1 www2; do echo Stopper $"maskin"; ssh $"maskin" /etc/init.d/apache2 stop; done"
+\end{verbatim}
+
+Men så fann vi ut at det gav for liten leselighet så vi endte heller opp med denne koden:
+\begin{verbatim}
+alias stopApacheWS='for maskin in www1 www2; do printf "\nStopper apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 stop; done'
+\end{verbatim}
+
+\subsection{Oppgave 7}
+I utgangspunkt i koden i oppgave 6 ovanfor, lagde vi denne fungerende koden:
+\begin{verbatim}
+alias startApacheWS="for maskin in www1 www2; do echo Starter $"maskin"; ssh $"maskin" /etc/init.d/apache2 start; done"
+\end{verbatim}
+
+Men denne gav for liten leselighet, så vi endte heller opp med denne koden:
+\begin{verbatim}
+alias startApacheWS='for maskin in www1 www2; do printf "\nStarter apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 start; done'
+\end{verbatim}
+
+\subsection{Oppgave 8}
+I utgangspunkt i koden i oppgave 6 og 7 ovenfor, lagde vi denne fungerende koden:
+\begin{verbatim}
+alias restartApacheWS="for maskin in www1 www2; do echo Restarter $"maskin"; ssh $"maskin" /etc/init.d/apache2 restart; done"
+\end{verbatim}
+
+Men denne gav for liten leselighet, så vi endte heller opp med denne koden:
+\begin{verbatim}
+alias restartApacheWS='for maskin in www1 www2; do printf "\nRestarter apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 restart; done'
+\end{verbatim}
+
+\subsection{Oppgave 9}
+\subsubsection*{Oppgradering av database}
+Databasen blir gjerne oppgradert i større eller mindre grad. Å legge til en ny tabell, en ny kolonne i en eksisterende tabell, oppsplitting av en eksisterende tabell til to eller flere nye tabeller, eller andre oppgraderinger krever nøye koordinasjon mellom databasedrift, applikasjonsdrift og SAN- og infrastruktur. Når databasen skal bli oppgradert, må gjerne databasen vere “nede”/ute av drift mens dette skjer. Dette betyr at f.eks. webserverne vert ute av drift også, og de må da gi tydelig bekjed til bruker om at oppgraderinger foregår, og når nettsiden er antatt å kome opp igjen. Det krev også koordinering med SAN- og infrastruktur siden der kan komme ny informasjon, og eksisterende informasjon må ikke gå tapt.
+
+\subsubsection*{Backup}
+Under en backupprosess er de andre nodene i driftsgruppen nødt til å koordineres, slik at de kan stoppe trafikken til den aktuelle noden som det tas backup av, slik at data ikke blir tapt. Enkelte webtjenester er nede er bestemt antall timer hver natt på grunn av backupprosesser.
+
+\subsubsection*{Ny Release}
+Når der kommer en ny release kreves dette koordinering mellom de ulike driftsgruppene. I en ny release vil applikasjonsdriftsgruppen gjøre endringene som trengs, og endringene vil foregå på serversiden. Da vil serverne vere “nede” i den perioden det tar for den nye releasen til å bli ferdig implementert. Ved ny release kommer det gjerne ny og annerledes informasjon som databasen må forholde seg til, og SAN- og infrastruktur må kanskje økes dersom det har for lite plass til forventningene til denne nye releasen.
+
+\subsubsection*{Ny Release}
+Ved utskifting av hardware må all trafikk gå rundt eller stoppes og krever derfor koordinering. Andre noder må derfor “vite” om dette, slik at de ikke prøver å ta i bruk en tjeneste eller maskin som ikke er oppe. Når utsikfitingen har skjedd, og all eventuell informasjon/data er flyttet over må alle noder i driftsgruppen på ny få en koordinering for at den akutuelle maskinen skal kunne tas i bruk.
+
+\subsection{Oppgave 10}
+Resultatet av denne kommandoen:
+\begin{verbatim}
+wget -O - -q http://www.vg.no | grep -i 'src="http' | wc -l
+\end{verbatim}
+forteller oss at kommandoen finner alle linjene i kildekoden som inneholder linker til andre nettsider.
+Vi prøvde andre linker:
+\begin{verbatim}
+google.com      - 0 resultat
+dagbladet.no    - 144 resultat
+wikipedia.org   - 0 resultat
+hig.no          - 1 resultat
+finn.no         - 24 resultat
+komplett.no     - 2 resultat
+\end{verbatim}
+
+Ettersom vi ser på resultatet virker det som det er en indikasjon på hvor mye reklame og annonser det finnes på en side. Resultatet viser kun linjene relatert til andre nettsider, så linker til egne nettsider vil ikke bli vist i resultatet. Derfor viser f.eks hig.no, google.com, wikipedia.org og komplett.no så få resultat. Vg.no og dagbladet.no har ekstremt mange annonser, og det kan vere grunnen til at de har de fleste resultatene.
+
+Vi er usikker på om tallene vi får sier nøyaktig hvor mange annonser det finnes på siden, men man kan få en indikasjon på hvor mye reklame det er. Vi oppdaget at noen linker var tracking-baserte som bakgrunnskode basert på javascript. Vi antar at disse tracking-baserte resultatene kan hende var usynlige for den normale brukeren. I forhold til det vi først trudde, ved at kommandolinjen fann alle linjene på vg.no som inneholdt linker til andre nettsider, dvs poster, nyheter, mm., så er vi mer usikre nå. 
+
 %\addcontentsline{toc}{section}{Referanser} %Add this section to content table
 %\bibliographystyle{unsrt} % change for dcu, or something else entirely? unsrt is nice !- referanser
 %\bibliography{Referanser}
