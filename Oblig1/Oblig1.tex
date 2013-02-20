@@ -122,25 +122,20 @@ Vi jobbet mye med å finne ut hva som var gale med å lage en nøkkelbasert innl
   eksempel: ssh-copy-id root@www1
 \end{verbatim}
 Det var denne nettsida som til slutt gav oss inspirasjon til svaret:\\
-\begin{Verbatim}[samepage=true]
-http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/#more-268
-\end{Verbatim}
+\begin{verbatim}
+http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-
+password-using-ssh-keygen-ssh-copy-id/#more-268
+\end{verbatim}
 
 En fordel med nøkkelbasert innlogging er at det gjør det mulig å logge seg inn noenlunde sikkert, uten å skrive inn passord. Dersom en skrev inn et passordet til nøkkelen, vil dette bekrefte at du er den personen som det er meningen skal bruke den private nøkkelen. Nøkkelbasert innlogging er sett på som mykje meir sikkert enn passordbasert innlogging, når en tenker på angrep fra et tredjepartsystem. Sjangsen for å knekke nøkkelen er veldig redusert i forhold til å knekke et vanlig dårlig passord.\\
 
 Ulempene med nøkkelbasert innlogging er at om noen først kommer seg inn i systemet kan den enkelt bevege seg rundt mellom de forskjellige maskinene uten å måtte knekke et nytt passord for hver maskin.
 
-<<<<<<< HEAD
-\subsection{Oppgave 2}
-Vi brukte kommandoen “uptime” og fekk dette resultatet:\\
-16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10\\
-=======
 \subsection*{Oppgave 2}
 \begin{verbatim}
 Vi brukte kommandoen “uptime” og fekk dette resultatet:
 16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10
 \end{verbatim}
->>>>>>> Added unfinished part 2
 
 Dersom vi bryter ned resultatet får vi:\\
 \begin{enumerate}
@@ -155,15 +150,23 @@ Punkt 1 er den nåværende tiden, dvs tidspunktet vi la inn kommandoen “uptime
 Punkt 2 er hvor lenge maskinen har vært oppe siden forrige start.\\
 Punkt 3 er tidspunktet maskinen vart startet.\\
 Punkt 4 er Antall brukere som er koblet til maskinen.\\
-Punkt 5 er hvor mange prosesser som i gjennomsnitt er kjørt det siste minuttet, de siste fem minutter, og det siste kvarteret.\\
+Punkt 5 er hvor mange prosesser som i gjennomsnitt er kjørt det siste minuttet, de siste fem minutter, og det siste kvarteret.
 
-\begin{verbatim}[samepage=true]
-Vi gjekk inn på .bashrc ved å bruke nano. Og der slet vi veldig med å få aliasen til å fungere. Det var variabelen $maskin som var problemet. Den ble ikke registrert. Så da prøvde vi enkelt-klaffer og dobbelt-klaffer innenfor og utenfor dollartegnet, der til slutt $”maskin” fungerte, med dobbelt-klaff innenfor dollartegnet. Deretter ville vi ha navnet til maskinen med i aliasen for bedre leselighet, så da la vi til en printf. For å gjøre linjene like lange tok vi å la inn “%-10s”.
+\begin{verbatim}
+Vi gjekk inn på .bashrc ved å bruke nano. Og der slet vi veldig med å få 
+aliasen til å fungere. Det var variabelen $maskin som var problemet. Den 
+ble ikke registrert. Så da prøvde vi enkelt-klaffer og dobbelt-klaffer 
+innenfor og utenfor dollartegnet, der til slutt $”maskin” fungerte, med 
+dobbelt-klaff innenfor dollartegnet. Deretter ville vi ha navnet til 
+maskinen med i aliasen for bedre leselighet, så da la vi til en printf. 
+For å gjøre linjene like lange tok vi å la inn “%-10s”.
 \end{verbatim}
 
 Koden så slik ut:
 \begin{verbatim}
-alias uptimeAll="for maskin in db1 db2 www1 www2 storage1 storage2 backup cache balancer manager; do printf "%-10s" $"maskin": ;  ssh $"maskin" uptime; done"
+alias uptimeAll="for maskin in db1 db2 www1 www2 storage1 storage2 backup 
+cache balancer manager; do printf "%-10s" $"maskin": ;  ssh $"maskin" 
+uptime; done"
 \end{verbatim}
 
 Resultatet ser slik ut:\\
@@ -187,7 +190,10 @@ En slik kommando er nyttig for å kunne få en rask oversikt over hvor mange som
 Vi valgte MemFree siden denne informasjonsbiten forteller oss hvor mye plass i minnet det er igjen i de forskjellige maskinene. \\
 
 Koden såg slik ut:\\
-for i in \{1..10\}; do printf "\%-10s" 10.0.0.\$i:; ssh 10.0.0.\$i cat /proc/meminfo | grep MemFree; done\\
+\begin{verbatim}
+for i in {1..10}; do printf "%-10s" 10.0.0.$i:; ssh 10.0.0.$i 
+cat /proc/meminfo | grep MemFree; done
+\end{verbatim}
 
 Resultatet såg slik ut:\\
 \begin{tabular}{lr}
@@ -215,7 +221,10 @@ df -h | grep '^([^|]+\|){3}'
 \end{verbatim}
 
 Slik ser koden ut:\\
-alias memfreeAll="\ for i in \{1..10\}; do printf "\%-10s" 10.0.0.\$"i":; ssh 10.0.0.\$"i"\ df -h | grep rootfs | tr -s ' ' | cut -d ' ' -f 4; done"\\
+\begin{verbatim}
+alias memfreeAll="for i in {1..10}; do printf "%-10s" 10.0.0.$"i":; 
+ssh 10.0.0.$"i" df -h |grep rootfs| tr -s ' ' | cut -d ' ' -f 4; done"
+\end{verbatim}
 
 Slik ser resultatet ut:\\
 10.0.0.1: 4.2G\\
@@ -318,7 +327,7 @@ Deretter prøvde vi igjen: wget -O - -q http://128.39.141.231/test.php for å sj
 
 Vi sendte en epost tilbake til Begnum med resultatet. Begnum svarte raskt at det var pound som ikke hadde startet, og anbefalte oss å bruke koden “service pound start” for å starte pound.
 
-Vi prøvde service pound start, men fikk error-beskjed om at cmd ikke kjente til kommandoen "service". Dermed letet vi litt på nettet og fant denne nettsiden:   https://help.ubuntu.com/community/Pound
+Vi prøvde service pound start, men fikk error-beskjed om at cmd ikke kjente til kommandoen "service". Dermed letet vi litt på nettet og fant denne nettsiden:  \\ https://help.ubuntu.com/community/Pound\\
 der vi forsto at vi kanskje måtte vere root for å starte pound, og vi prøvde denne koden:
 \begin{verbatim}
 /etc/init.d/pound start
@@ -364,34 +373,40 @@ Deretter prøvde vi å kombinere kodene og la de inn som alias. Dette førte til
 
 Dette er koden vi endte opp med først:
 \begin{verbatim}
-alias stopApacheWebservers="for maskin in www1 www2; do echo Stopper $"maskin"; ssh $"maskin" /etc/init.d/apache2 stop; done"
+alias stopApacheWebservers="for maskin in www1 www2; do echo Stopper 
+$"maskin"; ssh $"maskin" /etc/init.d/apache2 stop; done"
 \end{verbatim}
 
 Men så fann vi ut at det gav for liten leselighet så vi endte heller opp med denne koden:
 \begin{verbatim}
-alias stopApacheWS='for maskin in www1 www2; do printf "\nStopper apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 stop; done'
+alias stopApacheWS='for maskin in www1 www2; do printf "\nStopper 
+apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 stop; done'
 \end{verbatim}
 
 \subsection{Oppgave 7}
 I utgangspunkt i koden i oppgave 6 ovanfor, lagde vi denne fungerende koden:
 \begin{verbatim}
-alias startApacheWS="for maskin in www1 www2; do echo Starter $"maskin"; ssh $"maskin" /etc/init.d/apache2 start; done"
+alias startApacheWS="for maskin in www1 www2; do echo Starter $"maskin"; 
+ssh $"maskin" /etc/init.d/apache2 start; done"
 \end{verbatim}
 
 Men denne gav for liten leselighet, så vi endte heller opp med denne koden:
 \begin{verbatim}
-alias startApacheWS='for maskin in www1 www2; do printf "\nStarter apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 start; done'
+alias startApacheWS='for maskin in www1 www2; do printf "\nStarter apache 
+paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 start; done'
 \end{verbatim}
 
 \subsection{Oppgave 8}
 I utgangspunkt i koden i oppgave 6 og 7 ovenfor, lagde vi denne fungerende koden:
 \begin{verbatim}
-alias restartApacheWS="for maskin in www1 www2; do echo Restarter $"maskin"; ssh $"maskin" /etc/init.d/apache2 restart; done"
+alias restartApacheWS="for maskin in www1 www2; do echo Restarter 
+$"maskin"; ssh $"maskin" /etc/init.d/apache2 restart; done"
 \end{verbatim}
 
 Men denne gav for liten leselighet, så vi endte heller opp med denne koden:
 \begin{verbatim}
-alias restartApacheWS='for maskin in www1 www2; do printf "\nRestarter apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 restart; done'
+alias restartApacheWS='for maskin in www1 www2; do printf "\nRestarter 
+apache paa %s:\n" $maskin; ssh $maskin /etc/init.d/apache2 restart; done'
 \end{verbatim}
 
 \subsection{Oppgave 9}
