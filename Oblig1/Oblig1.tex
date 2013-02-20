@@ -1,5 +1,6 @@
 \documentclass[a4paper, norsk, 12pt]{article}
 \usepackage[T1]{fontenc}
+\usepackage{fancyvrb}
 %\documentclass{article} % was article, thought i'd try with report...
 \usepackage{float}
 %\usepackage{fullpage} % 1 inch margins
@@ -116,20 +117,30 @@ Installere noder og endret config:
 \section{Ukesoppgaver Nr. 2 - 25. Januar}
 \subsection{Oppgave 1}
 Vi jobbet mye med å finne ut hva som var gale med å lage en nøkkelbasert innlogging fra manager til de andre maskinene. Vi prøvde mange kombinasjoner, forskjellige lagringsplasser, med og uten passord, forskjellege -t -i++, og andre kombinasjoner. Til slutt fann vi ut at problemet var at vi hadde lagret key-ene i en egen separat mappe, men at den skulle ligge under en spesifikk key-mappe(default). Da fikk vi laget en key i gruppe7 og sendt public keyen til de andre maskinene. Etterpå fann vi ut at det var root som skulle ha key, og ikkje gruppe7, so da måtte vi lage en ny key som root. Da måtte  vi overwrite keyen i gruppe7. Vi brukte disse kodene, og vi har ingen passord:\\
-
-  ssh-keygen -t rsa\\
-  eksempel: ssh-copy-id root@www1\\
-  
+\begin{verbatim}
+  ssh-keygen -t rsa
+  eksempel: ssh-copy-id root@www1
+\end{verbatim}
 Det var denne nettsida som til slutt gav oss inspirasjon til svaret:\\
-http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/\\
+\begin{Verbatim}[samepage=true]
+http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/#more-268
+\end{Verbatim}
 
 En fordel med nøkkelbasert innlogging er at det gjør det mulig å logge seg inn noenlunde sikkert, uten å skrive inn passord. Dersom en skrev inn et passordet til nøkkelen, vil dette bekrefte at du er den personen som det er meningen skal bruke den private nøkkelen. Nøkkelbasert innlogging er sett på som mykje meir sikkert enn passordbasert innlogging, når en tenker på angrep fra et tredjepartsystem. Sjangsen for å knekke nøkkelen er veldig redusert i forhold til å knekke et vanlig dårlig passord.\\
 
-Ulempene med nøkkelbasert innlogging er at om noen føst kommer seg inn i systemet kan den enkelt bevege seg rundt mellom de forskjellige maskinene uten å måtte knekke et nytt passord for hver maskin.
+Ulempene med nøkkelbasert innlogging er at om noen først kommer seg inn i systemet kan den enkelt bevege seg rundt mellom de forskjellige maskinene uten å måtte knekke et nytt passord for hver maskin.
 
+<<<<<<< HEAD
 \subsection{Oppgave 2}
 Vi brukte kommandoen “uptime” og fekk dette resultatet:\\
 16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10\\
+=======
+\subsection*{Oppgave 2}
+\begin{verbatim}
+Vi brukte kommandoen “uptime” og fekk dette resultatet:
+16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10
+\end{verbatim}
+>>>>>>> Added unfinished part 2
 
 Dersom vi bryter ned resultatet får vi:\\
 \begin{enumerate}
@@ -146,13 +157,16 @@ Punkt 3 er tidspunktet maskinen vart startet.\\
 Punkt 4 er Antall brukere som er koblet til maskinen.\\
 Punkt 5 er hvor mange prosesser som i gjennomsnitt er kjørt det siste minuttet, de siste fem minutter, og det siste kvarteret.\\
 
+\begin{verbatim}[samepage=true]
+Vi gjekk inn på .bashrc ved å bruke nano. Og der slet vi veldig med å få aliasen til å fungere. Det var variabelen $maskin som var problemet. Den ble ikke registrert. Så da prøvde vi enkelt-klaffer og dobbelt-klaffer innenfor og utenfor dollartegnet, der til slutt $”maskin” fungerte, med dobbelt-klaff innenfor dollartegnet. Deretter ville vi ha navnet til maskinen med i aliasen for bedre leselighet, så da la vi til en printf. For å gjøre linjene like lange tok vi å la inn “%-10s”.
+\end{verbatim}
 
-Vi gikk inn på .bashrc ved å bruke nano. Og der slet vi veldig med å få aliasen til å fungere. Det var variabelen \$"maskin"\ som var problemet. Den ble ikke registrert. Så da prøvde vi enkelt-klaffer og dobbelt-klaffer innenfor og utenfor dollartegnet, der til slutt \$"maskin” fungerte, med dobbelt-klaff innenfor dollartegnet. Deretter ville vi ha navnet til maskinen med i aliasen for bedre leselighet, så da la vi til en printf. For å gjøre linjene like lange tok vi å la inn “\%-10s”. \\
+Koden så slik ut:
+\begin{verbatim}
+alias uptimeAll="for maskin in db1 db2 www1 www2 storage1 storage2 backup cache balancer manager; do printf "%-10s" $"maskin": ;  ssh $"maskin" uptime; done"
+\end{verbatim}
 
-Koden så slik ut:\\
-alias uptimeAll="\ for maskin in db1 db2 www1 www2 storage1 storage2 backup cache balancer manager; do printf "\%-10s" \$"maskin": ;  ssh \$"maskin" uptime; done"\\
-
-\textbf{Resultatet ser slik ut:}\\
+Resultatet ser slik ut:\\
 \begin{tabular}{lllll}
 db1: & 20:42:36 up 40 days, & 23:27, & 2 users, & load average: 0.01, 0.06, 0.06\\
 db2: & 20:42:36 up 40 days, & 23:27, & 2 users, & load average: 0.01, 0.05, 0.06\\
@@ -193,10 +207,12 @@ Resultatet såg slik ut:\\
 Først prøvde vi å forstå dataane fra df -h, og prøvde å finne ut hvilken av linjene som representerte hvor mye plass det var ledig i serverene. Vi slet veldig med å finne ut hvordan grep fungerte på den måten at den skaffet bare dataane frå kolonne 4, dvs den kolonnen som het Avail. Vi brukte ofte manualen til grep, cut, awk og andre for å finne hint om hva vi kunne gjøre for å komme videre.\\
 
 Flere kodesnutter feilet som f.eks:\\
-df -h | cut -d$\backslash$  -f1\\
-df -h | grep "\^{}.$\backslash$\{15\}"\\
-df -h | egrep -v "Avail"\\
-df -h | grep '\^{}([\^{}|]+|)\{3\}'\\
+\begin{verbatim}
+df -h | cut -d\  -f1
+df -h | grep "^.\{15\}"
+df -h | egrep -v "Avail"
+df -h | grep '^([^|]+\|){3}'
+\end{verbatim}
 
 Slik ser koden ut:\\
 alias memfreeAll="\ for i in \{1..10\}; do printf "\%-10s" 10.0.0.\$"i":; ssh 10.0.0.\$"i"\ df -h | grep rootfs | tr -s ' ' | cut -d ' ' -f 4; done"\\
