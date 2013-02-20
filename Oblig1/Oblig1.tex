@@ -1,4 +1,5 @@
 \documentclass[a4paper, norsk, 12pt]{article}
+\usepackage[T1]{fontenc}
 %\documentclass{article} % was article, thought i'd try with report...
 \usepackage{float}
 %\usepackage{fullpage} % 1 inch margins
@@ -118,8 +119,111 @@ Installere noder og endret config:
 
 %\chapter{Innledning}
 \section{Introduksjon} 
+\section{Ukesoppgaver 25. Januar}
+\subsection*{Oppgave 1}
+Vi jobbet mye med å finne ut hva som var gale med å lage en nøkkelbasert innlogging fra manager til de andre maskinene. Vi prøvde mange kombinasjoner, forskjellige lagringsplasser, med og uten passord, forskjellege -t -i++, og andre kombinasjoner. Til slutt fann vi ut at problemet var at vi hadde lagret key-ene i en egen separat mappe, men at den skulle ligge under en spesifikk key-mappe(default). Da fikk vi laget en key i gruppe7 og sendt public keyen til de andre maskinene. Etterpå fann vi ut at det var root som skulle ha key, og ikkje gruppe7, so da måtte vi lage en ny key som root. Da måtte  vi overwrite keyen i gruppe7. Vi brukte disse kodene, og vi har ingen passord:\\
+
+  ssh-keygen -t rsa\\
+  eksempel: ssh-copy-id root@www1\\
+  
+Det var denne nettsida som til slutt gav oss inspirasjon til svaret:\\
+http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/\\
+
+En fordel med nøkkelbasert innlogging er at det gjør det mulig å logge seg inn noenlunde sikkert, uten å skrive inn passord. Dersom en skrev inn et passordet til nøkkelen, vil dette bekrefte at du er den personen som det er meningen skal bruke den private nøkkelen. Nøkkelbasert innlogging er sett på som mykje meir sikkert enn passordbasert innlogging, når en tenker på angrep fra et tredjepartsystem. Sjangsen for å knekke nøkkelen er veldig redusert i forhold til å knekke et vanlig dårlig passord.\\
+
+Ulempene med nøkkelbasert innlogging er at om noen føst kommer seg inn i systemet kan den enkelt bevege seg rundt mellom de forskjellige maskinene uten å måtte knekke et nytt passord for hver maskin.
+
+\subsection*{Oppgave 2}
+Vi brukte kommandoen “uptime” og fekk dette resultatet:\\
+16:00:33 up 40 days, 18:44, 32 users,  load average: 0.19, 0.14, 0.10\\
+
+Dersom vi bryter ned resultatet får vi:\\
+\begin{enumerate}
+\item 16:00:33
+\item 40 days
+\item 18:44
+\item 32 users
+\item load average: 0.19, 0.14, 0.10
+\end{enumerate}
+
+Punkt 1 er den nåværende tiden, dvs tidspunktet vi la inn kommandoen “uptime”\\
+Punkt 2 er hvor lenge maskinen har vært oppe siden forrige start.\\
+Punkt 3 er tidspunktet maskinen vart startet.\\
+Punkt 4 er Antall brukere som er koblet til maskinen.\\
+Punkt 5 er hvor mange prosesser som i gjennomsnitt er kjørt det siste minuttet, de siste fem minutter, og det siste kvarteret.\\
 
 
+Vi gikk inn på .bashrc ved å bruke nano. Og der slet vi veldig med å få aliasen til å fungere. Det var variabelen \$"maskin"\ som var problemet. Den ble ikke registrert. Så da prøvde vi enkelt-klaffer og dobbelt-klaffer innenfor og utenfor dollartegnet, der til slutt \$"maskin” fungerte, med dobbelt-klaff innenfor dollartegnet. Deretter ville vi ha navnet til maskinen med i aliasen for bedre leselighet, så da la vi til en printf. For å gjøre linjene like lange tok vi å la inn “\%-10s”. \\
+
+Koden så slik ut:\\
+alias uptimeAll="\ for maskin in db1 db2 www1 www2 storage1 storage2 backup cache balancer manager; do printf "\%-10s" \$"maskin": ;  ssh \$"maskin" uptime; done"\\
+
+\textbf{Resultatet ser slik ut:}\\
+\begin{tabular}{lllll}
+db1: & 20:42:36 up 40 days, & 23:27, & 2 users, & load average: 0.01, 0.06, 0.06\\
+db2: & 20:42:36 up 40 days, & 23:27, & 2 users, & load average: 0.01, 0.05, 0.06\\
+www1: & 20:42:37 up 40 days, & 23:26, & 4 users,& load average: 0.01, 0.06, 0.06\\
+www2: & 20:42:37 up 40 days, & 23:26, & 2 users,& load average: 0.01, 0.07, 0.07\\
+storage1: & 20:42:37 up 40 days, & 23:26, & 1 user, & load average: 0.01, 0.07, 0.07\\
+storage2: & 20:42:37 up 40 days, & 23:26, & 1 user, & load average: 0.01, 0.07, 0.07\\
+backup: & 20:42:37 up 40 days, & 23:27, & 1 user, & load average: 0.01, 0.04, 0.05\\
+cache: & 20:42:37 up 40 days, & 23:27, & 2 users, & load average: 0.01, 0.06, 0.07\\
+balancer: & 20:42:37 up 40 days, & 23:27, & 2 users, & load average: 0.00, 0.02, 0.05\\
+manager: & 20:42:38 up 40 days, & 23:26, & 9 users, & load average: 0.10, 0.18, 0.21
+\end{tabular}
+\\
+
+En slik kommando er nyttig for å kunne få en rask oversikt over hvor mange som bruker maskinene i øyeblikket, tilfellet en skulle ønske å gjøre noe service eller lignende og derfor starte maskinene på nytt. Eller for å sjekke hvor stor belastning det er på maskinene i tilfellet man ønsker å gjøre noe som krever mye ressurser. Vi kan også enkelt se om noen av maskinene er nede.
+
+\subsection*{Oppgave 9}
+Vi valgte MemFree siden denne informasjonsbiten forteller oss hvor mye plass i minnet det er igjen i de forskjellige maskinene. \\
+
+Koden såg slik ut:\\
+for i in \{1..10\}; do printf "\%-10s" 10.0.0.\$i:; ssh 10.0.0.\$i cat /proc/meminfo | grep MemFree; done\\
+
+Resultatet såg slik ut:\\
+\begin{tabular}{lr}
+10.0.0.1: MemFree: &         355512 kB\\
+10.0.0.2: MemFree: &         992240 kB\\
+10.0.0.3: MemFree: &        1085616 kB\\
+10.0.0.4: MemFree: &        1186208 kB\\
+10.0.0.5: MemFree: &        1215088 kB\\
+10.0.0.6: MemFree: &        1214856 kB\\
+10.0.0.7: MemFree: &        1215204 kB\\
+10.0.0.8: MemFree: &        1217640 kB\\
+10.0.0.9: MemFree: &        1218392 kB\\
+10.0.0.10:MemFree: &        1218144 kB
+\end{tabular}
+
+\subsection*{Oppgave 10}
+Først prøvde vi å forstå dataane fra df -h, og prøvde å finne ut hvilken av linjene som representerte hvor mye plass det var ledig i serverene. Vi slet veldig med å finne ut hvordan grep fungerte på den måten at den skaffet bare dataane frå kolonne 4, dvs den kolonnen som het Avail. Vi brukte ofte manualen til grep, cut, awk og andre for å finne hint om hva vi kunne gjøre for å komme videre.\\
+
+Flere kodesnutter feilet som f.eks:\\
+df -h | cut -d$\backslash$  -f1\\
+df -h | grep "\^{}.$\backslash$\{15\}"\\
+df -h | egrep -v "Avail"\\
+df -h | grep '\^{}([\^{}|]+|)\{3\}'\\
+
+Slik ser koden ut:\\
+alias memfreeAll="\ for i in \{1..10\}; do printf "\%-10s" 10.0.0.\$"i":; ssh 10.0.0.\$"i"\ df -h | grep rootfs | tr -s ' ' | cut -d ' ' -f 4; done"\\
+
+Slik ser resultatet ut:\\
+10.0.0.1: 4.2G\\
+10.0.0.2: 8.7G\\
+10.0.0.3: 4.1G\\
+10.0.0.4: 4.2G\\
+10.0.0.5: 4.2G\\
+10.0.0.6: 4.2G\\
+10.0.0.7: 4.2G\\
+10.0.0.8: 4.2G\\
+10.0.0.9: 7.0G\\
+10.0.0.10:7.0G
+
+\section{Ukesoppgaver 08. Februar}
+
+\subsection*{Oppgave 1}
+Vi fulgte how-to videoen fra fronter og støtte ikke borti noe problemet. Det eneste vi gjorde anerledes var å laste bookface-fila opp på dropbox og brukte wget til å laste den ned bookface derfra via en public link:\\
+ wget http://dl.dropbox.com/u/10542464/bookface-1.0.tar.gz
 
 
 %\clearpage
