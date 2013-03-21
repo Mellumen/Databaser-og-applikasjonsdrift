@@ -14,7 +14,7 @@
 \usepackage[margin=2.5cm]{geometry}
 %\usepackage{longtable} %Table that breakes pages
 %\usepackage{tabularx} %Table that breakes lines
-%\usepackage{ltablex} %Table that combines longtable and tubularx. (Use \begin{tabularx}
+\usepackage{ltablex} %Table that combines longtable and tubularx. (Use \begin{tabularx}
 \usepackage{graphicx} %To insert image
 \usepackage{parskip} %Removes indent and make space between the part sections, like \medskip.
 \usepackage[labelformat=empty]{caption} %Removes "Figur 'nr'" in \caption on images.
@@ -39,6 +39,10 @@
 \author{Solveig Sørheim 090880 \\ Martin Kristian Mellum 100874}
 \date{\today}
 
+%%Useful:
+%\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax] - removes big space after \begin{verbatim}
+%\verb - Small kode inline 
+%\textt - For bigger kode inline (line breaking)
 
 \begin{document}
 \begin{figure}[h!]
@@ -56,22 +60,171 @@
 
 \section{Ukesoppgaver Nr. 5 - 15. Februar}
 \subsection{Oppgave 1}
+På forelesingen den 17. Februar satte Sørheim opp database på db2 som vist i foilerne.
+
 \subsection{Oppgave 2}
+På forelesingen den 17. Februar satte Sørheim opp munin-plugin på db2 som vist i foilerne. Senere satte vi opp munin-plugin på db1 som vist i foilerne.
+
 \subsection{Oppgave 3}
+I /etc/mysql/my.cnf i db1 og db2 fann vi linjen som inneheldt
+\begin{verbatim}
+#log_bin
+\end{verbatim}
+Vi tok bort kommenteringen, slik at binary logging vart enabled.
+
+Deretter restartet vi mysql ved å bruke /etc/init.d/mysql restart
 \subsection{Oppgave 4}
+I /etc/mysql/my.cnf i db1 og db2 fann vi linjene som assosierte med slow queries og endret de til:
+\begin{verbatim}
+log_slow_queries        = /var/log/mysql/mysql-slow.log
+long_query_time = 5
+\end{verbatim}
+Deretter tok vi restart på mysql ved koden /etc/init.d/mysql/restart
 \subsection{Oppgave 5}
+Vi logget oss på mysql databasen bf på db1 fra www1:
+\begin{verbatim}
+root@www1:~# mysql -h db1 -u bfuser -p bf
+Enter password:
+\end{verbatim}
+Herfra skrev og fikk følgende:
+\begin{verbatim}
+mysql> show tables;
++--------------+
+| Tables_in_bf |
++--------------+
+| comments     |
+| posts        |
+| user         |
++--------------+
+3 rows in set (0.00 sec)
+mysql> select * FROM user;
+Empty set (0.00 sec)
+\end{verbatim}
+Her ser vi at det ikke er noen brukere ennå.
+
+Vi slet veldig med å finne ut hvordan vi kunne logge oss på databasen bf fjernt. Då vi fann ut hvordan dette skjedde slet vi med å få spørringen til å skje. Den første suksessfulle koden vår var: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "show tables;"  
+\end{verbatim}
+Denne viste oss at vi klarte å kjøre en spørring på databasen.
+
+Vi prøvde oss frem og kom frem til at denne koden virket bra:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "select * from user;"
+\end{verbatim}
+Problemet med den var at den viste navnene og all annen informasjon om brukerne, og vi var bare interessert i antall brukere. Dermed kom vi frem til denne koden:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "select COUNT(*) from user;"
+\end{verbatim}
+Vi prøvde mye med å finne ut hvordan vi kunne lage et perl script for å kjøre bash kommandoer, men la prosjektet på is.
+
+Etter å ha sett på tidligere pdf-er om perl på fronter, fant vi ut at vi kunne bruke “print”  for å kjøre bash kommandoer i perl. Koden så slik ut:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+print `mysql -h db1 -u bfuser -pmybfpassword bf -e "select COUNT(*) from user;"`;
+\end{verbatim}
+
 \subsection{Oppgave 6}
+For å finne ut hvilke tabeller som låg i databasen brukte vi denne kommandoen: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "show tables;"
+\end{verbatim}
+
+Vi fikk dette resultatet:
+\begin{verbatim}
++--------------+
+| Tables_in_bf |
++--------------+
+| comments     |
+| posts        |
+| user         |
++--------------+
+\end{verbatim}
+For å se hvilke enheter som låg under tabellen posts skrev  vi denne spørringen: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "select *, COUNT(*) from posts;"
+\end{verbatim}
+Dermed lagde vi spørringen:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+mysql -h db1 -u bfuser -pmybfpassword bf -e "select COUNT(*) from posts;"
+\end{verbatim}
+Vi fikk dette resultatet. Dette er nok pga vi har ingen brukere i bookface:
+\begin{verbatim}
++----------+
+| COUNT(*) |
++----------+
+|        0 |
++----------+
+\end{verbatim}
 \subsection{Oppgave 7}
+Så lenge vi ser at det er trafikk og at det blir gjort MySQL spørringer bør databasen fungere som den skal. De variablene vi har til rådighet gjennom munin akkurat no er forskjellige mysql tabeller, som MySQL queries - by day og - by week. Vi kan i munin få en god oversikt over alle maskiner, men hvordan de fungerer i øyeblikket får vi nødvendigvis ingen god oversikt over, da data kun blir oppdatert hver femte minutt. Å lete gjennom tabellene etter de spesifikke tabellene som gir informasjon om databasene kjører akkurat nå, og å finne informasjonen i tabellene, gjør denne metoden svært tungvindt. Det hadde vert mye lettere dersom det fantes en kode som fortalte oss enkelt og greit om databasene er oppe akkurat nå, og evt hvor lenge de har vert oppe.
+
+Heldigvis finnes en slik kode:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+/etc/init.d/mysql status
+\end{verbatim}
+For å kjøre denne koden enkelt fra andre maskiner og på begge databasene finnes denne koden:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+for maskin in db1 db2; do ssh $maskin /etc/init.d/mysql status | grep Uptime; done;
+\end{verbatim}
 \subsection{Oppgave 9}
+\subsubsection*{9.1} 
+
+For å sjekke om begge webserverne er oppe: 
+\begin{itemize}
+\item Om man kjører: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+ wget -O - -q http://10.0.0.3/test.php og wget -O - -q http://10.0.0.4/test.php 
+\end{verbatim} 
+hvor test.php koden fra oppgave 4 uke 3, får vi vite om begge kjører.
+
+\item Evt kan en gå inn på direkte på webserverne, lokalt.
+\end{itemize}
+
+\subsubsection*{9.2} For å sjekke om begge databasene er oppe:
+\begin{itemize}
+\item Denne koden vil vise oppetiden til maskinene, men den viser ikke om maskinene kjører nå:   \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]  
+\begin{verbatim}
+for maskin in db1 db2; do ssh $maskin /etc/init.d/mysql status | grep Uptime; done;
+\end{verbatim}
+
+\item En kan gå inn på munin og sjekke om databasene er oppe, men dette går tregt.
+
+\item En kan gå inn på bookface, men det er ikke så pålitelig siden noen kan slå av ting.
+
+\item En kan gå inn på databasene direkte, lokalt.
+\end{itemize}
+
+\subsubsection*{9.3} For å sjekke om webserver kan kommunisere med databasen:
+\begin{itemize}
+\item Gå inn på bookface og sjekk om bookface virker, dvs om der er innhold i bookface (users, posts). Dersom den displayer ingen users, posts mm., og ikke displayer f.eks 0 users og 0 posts, da kommuniserer ikke bookface med mysql.
+
+\item Denne er vi ikke sikre på, men gå inn på www1 og bruk denne koden: \texttt{mysql -h db1 -u bfuser -pmybfpassword bf -e "show tables;"}. På denne måten vil vi i webserveren prøve å kommunisere med databasen, og dersom vi får opp et svar så fungerte kommunikasjonen.
+
+\item En kan sammenligne innholdet i databasen med det som blir vist på bookface.
+\end{itemize}
+\subsubsection*{9.4}Root passord til mysql databasen:
+\begin{itemize}
+\item Når du installerer mysql-server på din databaseserver må du huske å skrive ned passordet.
+
+\item Når du skal opprette en ny bruker i din database, må du bruke: grant rettigheter on database to ‘bruker’@’maskin’ [ idenitified by ‘passord’];
+
+\item Husk å “flush privileges;” etter hver forandring.
+
+\item For å sette opp root passord for første gang må du bruke mysqladmin kommandoen: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+ $ mysqladmin -u root password NEWPASSWORD
+\end{verbatim}
+
+\item For å endre eller oppdatere et root passord må du bruke: \hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax] %To get just a small new line, not a paragraph
+\begin{verbatim}
+$ mysqladmin -u root -p'oldpassword' password newpass
+\end{verbatim}
+\end{itemize}
 
 \section{Ukesoppgaver Nr. 6 - 22. Februar}
 \subsection{Oppgave 1}
-I forelesingen den 15. Februar gjorde vi noko feil med pakkekonfigurasjonen til postfix. Senere da vi prøvde å gjøre som det sto i filmen her:
-\begin{verbatim}
-http://www.iu.hio.no/~kyrre/gmail_postfix_relay.mp4
-\end{verbatim}
- 
-Så gikk vi gjennom alle punktene etter pakkekonfigurasjonen, og trudde alt var feilfritt. Etter å ha installert postfix og mailx så testet vi ut dette ved å pipe en echo beskjed til mailx og sende dette til vår test-gmail konto som vi lagde tidligere. Det ble ikke sendt noen mail. Så da prøvde vi å fjerne postfix ved å bruke remove, og deretter fjerne libsysl2-2. Men det viste seg å vere vanskelig. I alle fall fikk vi fjernet postfix, og så prøvde vi å installere postfix igjen. Men da kom ikke pakkekonfigurasjonen opp. Vi ga oss da.\\
+I forelesingen den 15. Februar gjorde vi noe feil med pakkekonfigurasjonen til postfix. Senere da vi prøvde å gjøre som det sto i filmen her: \url{http://www.iu.hio.no/~kyrre/gmail_postfix_relay.mp4}
+så gikk vi gjennom alle punktene etter pakkekonfigurasjonen, og trudde alt var feilfritt. Etter å ha installert postfix og mailx så testet vi ut dette ved å pipe en echo beskjed til mailx og sende dette til vår test-gmail konto som vi lagde tidligere. Det ble ikke sendt noen mail. Så da prøvde vi å fjerne postfix ved å bruke remove, og deretter fjerne libsysl2-2. Men det viste seg å vere vanskelig. I alle fall fikk vi fjernet postfix, og så prøvde vi å installere postfix igjen. Men da kom ikke pakkekonfigurasjonen opp. Vi ga oss da.\\
 
 For å rette opp i feilen prøvde vi å kjøre en apt-get remove på pakkene, dette løste ikke problemet, for da vi igjen installerte postfix sammen med alle andre pakker fikk vi ikke opp “wizarden” som vi skulle få opp. Først da vi kjørte apt-get remove --purge på alle pakker, samt apt-get clean og apt-get autoremove på alle pakker, samt en reboot, for så å installere alt igjen fikk vi opp wizarden. Akuratt hvilket av linjene som gjorde utslaget er vi ikke helt sikker på, men det løste problemet vårt. Etter dette fulgte vi tutorialen til punkt og prikke og fikk mailen til å fungere.
 
@@ -97,6 +250,84 @@ Dette vil si at klokken 22.30 så slår postfix seg av, og 09.20 slår den seg p
 
 
 \section{Ukesoppgaver Nr. 7 - 03. Mars}
+\subsection{Oppgave 1}
+Vi sjekket man logrotate, og diverse nettsider, og fann svaret:
+\begin{itemize}
+\item Hvilke filer som roteres:
+\begin{itemize}
+\item /var/log/mysql.log
+\item /var/log/mysql/mysql.log
+\item /var/log/mysql/mysql-slow.logi
+\end{itemize}
+Disse skilles ved et mellomrom, og man kan derfor legge til flere filer om ønskelig.
+
+\item Når filene roteres
+\begin{itemize}
+\item Filene roteres daglig, eller når filen blir for stor.
+\item Det går an å justere hvor ofte rotasjon skjer ved å la den rotere ukentlig, månedlig eller årlig. (weekly, monthly, yearly)
+\end{itemize}
+\item Hvor mange roterte filer du får
+\begin{itemize}
+\item rotate 7
+\end{itemize}
+Vi får tre stykker hver dag - en for hver logfil. og tar vare på filene opp til syv log intervaler tilbake.
+\end{itemize}
+\subsection{Oppgave 4}
+Secure Copy Protokollen (SCP) er en nettverksprotokoll som støttar filoverføring mellom verter i et nettverk. SCP bruker Secure Shell (SSH) for overføring av data, men utfører selve backup prosessen lokalt.
+
+Mysqldump er et backupprogram som kan bli brukt til å dumpe en database eller en samling av databaser for backup eller overføring til en annen SQL server (ikke nødvendigvis en MySQL server). Mysqldump gjør backup’n direkte over nettet.
+
+Mysqldump arbeider i samarbeid med MySQL serveren, mens scp bruker filkopieringsoperasjoner som er gjort eksternt til serveren. Der er flere fordeler og ulemper med disse metodene for å ta backup.
+
+Filene i mysqldumpen inneholder sql setninger for å lage tabell, eller fylle den, eller begge deler. Filene fra SCP er derimot direkte kopier fra databasen, og kan derfor ikke brukes andre steder.
+
+Når en bruker metoden scp må en ta forhåndsregler for å hindre at serverne på begge vertene ikke modifiserer tabellene mens vi kopierer de. Med mysqldump trenger vi ikke ta noen forhåndsregler for dette.
+
+Mysqldump bruker nettverket til å overføre filene, dette er en av dens av svakeheter, i tillegg blir mysqldump tregere enn scp i hastighet siden backupen skjer over nettet. SCP bruker SSH for å overfør filene, og sikrer dermed autentisering og konfidensialitet. Selve backupen SCP gjør er raskere enn mysql da denne skjer lokalt på filsystemnivå og krever dermed ingen nettverkstrafikk.
+
+Mysqldump genererer filer i sqlformat som er portable til andre maskiner, selv de med en annerledes hardware arkitektur. Den andre sql serveren treng ikke nødvendigvis å vere en MySQL server. Med scp må begge vertsmaskinene ha den samme hardware arkitekturen, eller så må alle tabellene som en kopierer vere portable tabelltyper. Hvis ikke kan de resulterende tabellene på den andre verten få veldig underlig innhold ellers. Den beste måten å sikre integritet av filene er å ta ned serveren, kopiere filene, og restarte serveren. Dersom du ikke vil ta ned serveren, så kan en bruke read-access locking protokoll som vil hindre at serveren endrer tabeller mens enkopierer dem.
+
+Her er en tabell som summerer opp funnene:
+
+\begin{tabularx}{\textwidth}{|X|X|X|} \hline
+ & \textbf{mysqldump} & \textbf{scp} \\ \hline
+Hvordan arbeider de i forhold til MySQL serveren: & Arbeider i samarbeid med MySQL serveren & Filkopieringsoperasjoner som er gjort eksternt til serveren \\ \hline
+Innhold i filen: & Dump som inneholder SQL setninger & Direkte kopi av tabellfilene \\ \hline
+Treng forhåndsregler for å hindre at serverene på begge vertene ikke modifiserer tabellene: & Nei & Ja \\ \hline
+Treng nettverkstilkobling: & Ja & Nei. Overføring skjer i samme nettverk \\ \hline
+Hastigheit for operasjon: & Treg pga overføring over nettet & Raskare enn mysqldump \\ \hline
+Portabilitet til andre maskiner og databaser: & Ja & Ja men begge maskinene må ha samme hardware arkitektur, eller tabeller må vere portable \\ \hline
+Er integritet sikret: & Integritet er sikret & Nei. Må ta ned serveren eller bruke read-access-lock \\ \hline
+
+\end{tabularx}
+
+\subsection{Oppgave 5}
+Kommandoen for å lage en ny bin-log er:\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax]
+\begin{verbatim}
+/var/log/mysql# mysqladmin -p flush-logs
+\end{verbatim}
+Vi undersøkte nettet etter svar for oppgave 4. Vi fann etter kvart svaret på denne nettsiden:
+\url{http://edc.tversu.ru/elib/inf/0051/0735712123_ch13lev1sec2.html}
+
+\subsection{Oppgave 6}
+I følge svaret til RolandMysqlDba i denne nettsiden \url{http://dba.stackexchange.com/questions/27749/binlog-has-bad-magic-number} har binære loggfiler forskjellige startsposisjonsnummer ved skapelsen av en ny binlog.
+
+Vi har sjekket flere av våre egne binlog filer med mysqlbinlog \verb|mysql-bin.00000x|, men på grunn av at innholdet som ble presentert blant annet inneholdt bilder (det ble printet ut mange forskjellige kroketegn, og vi fikk ikke tilbake kontrollen), så kunne vi ikke kryssjekke dette svaret fra RolandMysqlDba.
+
+Vi fikk se i følge \verb|mysql-bin.000007| at den inneholdt \verb|at 4|, \verb|end_log_pos 107|, og \verb|at 107| og \verb|end_log_pos 150|.
+
+
+På grunn av mangel på annen informasjon, svarer vi at binære loggfiler har forskjellig startposisjonsnummer ved skapelsen av en ny binlog.
+\subsection{Oppgave 9}
+“Vis et ekte eksempel fra dine egne binlog filer hvor du nøyaktig bestemmer hvilke spørringer som skal være med basert på posisjonene.”
+
+Vi fant ut at for å løse denne problemstillingen må vi gjøre en sql spørring som binlog da vil logge, og deretter finne igjen denne spørringen basert på binlog posisjonene. Vi vil da bruke:
+\begin{verbatim}
+    --start-position=N, -j N
+    --stop-position=N
+\end{verbatim}
+
+Dessverre forstår vi ikke helt hvordan vi skal klare å løse denne oppgaven, så vi sendte spørsmål til Begnum, og venter nå på svar. Vi fikk svar om at for å løse denne oppgaven skulle vi bare teste ut start-position, stop-position eller start-datetime og stop-datetime.
 
 \section{Ukesoppgaver Nr. 8 - 08. Mars}
 \subsection{Oppgave 1}
