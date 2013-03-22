@@ -58,7 +58,7 @@
 \pagebreak	% and break the page, because pretty
 
 
-\section{Ukesoppgaver Nr. 5 - 15. Februar}
+\section{Ukesoppgaver - 15. Februar}
 \subsection{Oppgave 1}
 På forelesingen den 17. Februar satte Sørheim opp database på db2 som vist i foilerne.
 
@@ -221,7 +221,7 @@ $ mysqladmin -u root -p'oldpassword' password newpass
 \end{verbatim}
 \end{itemize}
 
-\section{Ukesoppgaver Nr. 6 - 22. Februar}
+\section{Ukesoppgaver - 22. Februar}
 \subsection{Oppgave 1}
 I forelesingen den 15. Februar gjorde vi noe feil med pakkekonfigurasjonen til postfix. Senere da vi prøvde å gjøre som det sto i filmen her: \url{http://www.iu.hio.no/~kyrre/gmail_postfix_relay.mp4}
 så gikk vi gjennom alle punktene etter pakkekonfigurasjonen, og trudde alt var feilfritt. Etter å ha installert postfix og mailx så testet vi ut dette ved å pipe en echo beskjed til mailx og sende dette til vår test-gmail konto som vi lagde tidligere. Det ble ikke sendt noen mail. Så da prøvde vi å fjerne postfix ved å bruke remove, og deretter fjerne libsysl2-2. Men det viste seg å vere vanskelig. I alle fall fikk vi fjernet postfix, og så prøvde vi å installere postfix igjen. Men da kom ikke pakkekonfigurasjonen opp. Vi ga oss da.\\
@@ -249,7 +249,7 @@ Vi startet med å gå inn på /etc/crontab og se hva som låg der. Deretter krys
 Dette vil si at klokken 22.30 så slår postfix seg av, og 09.20 slår den seg på att.
 
 
-\section{Ukesoppgaver Nr. 7 - 03. Mars}
+\section{Ukesoppgaver - 03. Mars}
 \subsection{Oppgave 1}
 Vi sjekket man logrotate, og diverse nettsider, og fann svaret:
 \begin{itemize}
@@ -329,7 +329,7 @@ Vi fant ut at for å løse denne problemstillingen må vi gjøre en sql spørrin
 
 Dessverre forstår vi ikke helt hvordan vi skal klare å løse denne oppgaven, så vi sendte spørsmål til Begnum, og venter nå på svar. Vi fikk svar om at for å løse denne oppgaven skulle vi bare teste ut start-position, stop-position eller start-datetime og stop-datetime.
 
-\section{Ukesoppgaver Nr. 8 - 08. Mars}
+\section{Ukesoppgaver - 08. Mars}
 \subsection{Oppgave 1}
 \subsubsection*{1.1}
 Vi undersøkte filen \verb|tf2_50k.dat| i statistikk filen i \verb|LibreOffice|. I statistikk-filen ser vi tabeller med 1\%, 5\% og 10\% frekvenser. I følge oppgavesettet er der 50000 målinger \verb|(tatt hver 5 minutt)| i \verb|tf2_50k.dat| filen.  Målingene viser hvor mange spillere der var i Team Fortress i øyeblikket som var målt. Grafene, dvs de ulike frekvens-tabellene, har forskjellig antall blokker hver. 1\% frekvens har 100 blokker, 5\% har 20 blokker og 10\% har 10 blokker. Størrelsen på blokkene er hvor grov gruppering det er per spillere.\\
