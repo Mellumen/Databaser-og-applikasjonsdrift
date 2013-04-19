@@ -222,10 +222,59 @@ Der finnes to måter å teste ytelse på: aktiv og passiv. Ved aktiv ytelse går
 
 \section{Ukesoppgaver - 15. Mars}
 \subsection{Oppgave 1}
+Vi la inn mysql og munin-node på db2 samtidig med at vi gjorde dette på db1.
+
 \subsection{Oppgave 2}
+Vi fulgte fremgangsmåten i forelesningsfoilen helt til vi skulle endre på my.cnf på db2. Mysql ville ikke starte så lenge linjene som startet med “master” var med. Da vi kommenterte ut de linjene, startet mysql igjen, deretter fulgte vi fremgangsmåten videre uten feil. De linjene gikk bra å ta bort, da vi uansett skreiv det inn i det vi skulle starte slaven.
+
+For å legge inn bf.sql dumpen fra db1 inni den nylagde databasen i db2, prøvde vi på db1 denne kommandoen “cat bf.sql | mysql -u root -p bf -h db2”. Men denne gav feilmelding om at vi ikke har tilgang til db2 fra db1 uten passord. Dermed fant vi ut at vi kunne bruke scp for å overføre sql-filen fra db1 til db2. Dette viste seg å ikke vere enkelt, men vi kom frem til denne koden:
+\verb|scp bf.sql root@db2:/home/gruppe7/|
+
+Deretter fulgte vi forelesingsfoileren for å få cat bf.sql inn i bf databasa og videre. Vi hadde tidligere notert ned navnet på binlog-filen og posisjonsnummeret, og brukte det nå. Nå skal vi sjekke om master og slave er synkronisert.
+
+Vi kjørte en \verb|SELECT count(*) FROM user;| på både db1 og db2 å så at begge hadde 2894 users. Deretter gikk vi inn i db1 og gjorde en INSERT for å få inn en user til. Dette slet vi litt med da vi ikke var helt sikre på hvordan vi skulle gjøre med de forskjellige dataene, så det endte med tre flere users enn det vi startet med.
+
+Dette var koden vi brukte for å se hvilke verdier som lå i tabellen user:\\
+\verb|mysql -u root -p bf -e "select *, COUNT(*) from posts;"|
+
+Her er en liten del av resultatet som kom:
+\begin{verbatim}
+postID | userID | text                                  | postDate            | COUNT(*) |
++--------+--------+---------------------------------------+---------------------+----------+
+|      1 |     71 | Hillo, ho, ho, boy! Come, bird, come. | 2013-03-01 08:14:35
+\end{verbatim}
+Så da lagde vi brukere manuelt ved å sette inn en unik userId mm.
+
+Vi gjorde en ny COUNT på db1 og db2, og så at denne også hadde fått tre nye users. Vi konkluderte dermed at databasene var riktig satt opp
 \subsection{Oppgave 3}
+Vi gjekk inn på db2 og kjørte en count kommando i mysql for å telle antall brukere på slaven. Denne kommandoen er \verb|“select count(*) from user;”|. Antallet som kom frem var 2898. Dermed gjorde vi slave stop på databasen i db2. Deretter gikk vi inn i nettsiden:\\
+\verb|128.39.141.231/newuser.php|
+
+Dette gjorde vi et visst antall ganger for å lage nye brukere. Derettet sjekket vi i db1 hvor mange brukere som var der da, og det var 2905 brukere.
+
+Vi gikk inn på db2 igjen å kjørte en COUNT på users kun for å sjekke at det ikke var skjedd noe, vi fikk som ventet samme antall users som før vi stoppa slaven. Deretter startet vi slaven igjen, første COUNT etter starten fikk vi fortsatt det samme antall, mens neste kall vi gjorde fikk vi det oppdaterte antallet ut. Det tok med andre ord kun litt tid før endringene var synkronisert.
+
+Vi konkluderte derfor med at det går fint ann å midlertidig koble slaven fra masteren, og at den vil motta endringer så fort man skrur slaven på igjen.
+
 \subsection{Oppgave 4}
+Vi gikk inn på manager og på crontab for å sjekke hvor adressen til backupscriptet lå. Denne lå i backupserveren, (vi lagde denne i oppg 12 i Ukesoppgaver 1.Mars). Deretter gikk vi inni backupserveren og inn i backupscript.sh.
+
+Siden vi allerede hadde satt opp i backupscriptet at vi skulle ta samme type backup av db2 samtidig med backupen av db1 fjernet vi kun linjene som tok backup av db1. Scriptet så slik ut etter dette:
+\begin{verbatim}
+#!/bin/bash -x
+Db2backupfil="backupDb2_$(date +%H_%M_%d_%m).sql"
+ssh db2 mysqldump --opt --master-data=2 --flush-logs --all-databases 
+-u root -pflee4soda > $Db2backupfil
+\end{verbatim}
+Vi kjørte backup-scriptet og så at vi kun fikk en ny backup som kom fra db2, og at det var ca. like stor som backupene som tidligere ble tatt av db1 var.
 \subsection{Oppgave 5}
+Vi gikk inn på \verb|/var/log/mysql| i db1 og brukte cat på \verb|mysql_slow_log| filen. Men her kom det mye tegn som vi tolket som bilder, og vi fikk ingen nyttig informasjon. Så gikk vi inn på \verb|/var/log/mysql| i db2, men der var det ingen \verb|mysql_slow_log| fil. Da gikk vi inn i mysql config filen, og tok vekk kommenteringen på:
+\begin{verbatim}
+log_slow_queries = /var/log/mysql/mysql-slow.log
+long_query_time = 2
+\end{verbatim}
+Dette ble gjort før påske, og det som følger ble gjort etter:
+Vi kom på at det er noe som heter logg-rotering. Vi startet replikering før påske, og logg-rotering skjer på 7 dager. Det vil si at logg-roteringen har slettet filene før replikering skjedde, så vi er ikke i stand til å finne ut om der er noen forskjell på \verb|slow_query| fra tidligere.
 
 \section{Ukesoppgaver - 22. Mars}
 \subsection{Oppgave 1}
