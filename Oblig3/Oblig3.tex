@@ -1,0 +1,86 @@
+\documentclass[a4paper, norsk, 12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{fancyvrb}
+%\documentclass{article} % was article, thought i'd try with report...
+\usepackage{float}
+%\usepackage{fullpage} % 1 inch margins
+%\usepackage{harvard} % harvard reference style++
+\usepackage[hidelinks]{hyperref} % do not remember entirely what this does
+%%\usepackage{minted} % [LINUXONLY] list environment with code highlighting
+\usepackage[utf8]{inputenc} %To get æøå
+\usepackage[norsk]{babel} %Does it norway'ish
+%\setcounter{chapter}{-1} %chapter numeration to start on 0
+%\usepackage{titlesec} %To make chapter headings different
+\usepackage[margin=2.5cm]{geometry}
+%\usepackage{longtable} %Table that breakes pages
+%\usepackage{tabularx} %Table that breakes lines
+\usepackage{ltablex} %Table that combines longtable and tubularx. (Use \begin{tabularx}
+\usepackage{graphicx} %To insert image
+\usepackage{parskip} %Removes indent and make space between the part sections, like \medskip.
+\usepackage[labelformat=empty]{caption} %Removes "Figur 'nr'" in \caption on images.
+%\usepackage{color, colortbl} %To use colors in tabulars
+
+
+\newcommand{\tab}{\hspace*{2em}}
+
+%Removes the indent:
+%\setlength\parindent{0pt}
+
+%Changing the paragraph title look:
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex} %To get new line after title
+  {1.5ex \@plus .2ex}%
+  {\normalfont\large\bfseries}}
+\makeatother
+
+%\titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{2pc}{} %To make chapters nice
+\title{Oblig 3 \\ IMT3441 \\ Database- og applikasjonsdrift}
+\author{Solveig Sørheim 090880 \\ Martin Kristian Mellum 100874}
+\date{\today}
+
+%%Useful:
+%\hspace*{\fill} \\[-\dimexpr\baselineskip+\parskip\relax] - removes big space after \begin{verbatim}
+%\verb - Small kode inline 
+%\textt - For bigger kode inline (line breaking)
+
+\begin{document}
+\begin{figure}[h!]
+ \centering
+  \includegraphics[width=0.5\textwidth]{Images/hig_logo.png}
+ %\caption{Bare noko eg skribla på Paint..}
+ \maketitle       % make title
+\end{figure}
+\pagebreak
+%%\section{Abstract} % not sure if needed
+%%This section is to be written when all else is done. 100-200 words summarizing.
+\tableofcontents % make table of contents
+\pagebreak	% and break the page, because pretty
+
+
+\section{Ukesoppgaver - 15. Mars}
+\subsection{Oppgave 1}
+\subsection{Oppgave 2}
+\subsection{Oppgave 3}
+\subsection{Oppgave 4}
+\subsection{Oppgave 5}
+
+\section{Ukesoppgaver - 22. Mars}
+\subsection{Oppgave 1}
+\subsection{Oppgave 2}
+\subsection{Oppgave 3}
+\subsection{Oppgave 6}
+\subsection{Oppgave 7}
+\subsection{Oppgave 9}
+\subsection{Oppgave 10}
+
+
+%\clearpage
+%\addcontentsline{toc}{section}{Referanser} %Add this section to content table
+%\bibliographystyle{unsrt} % change for dcu, or something else entirely? unsrt is nice !- referanser
+%\bibliography{Referanser}
+
+%\addcontentsline{toc}{section}{Vedlegg} %Add this section to content table
+%\section*{Vedlegg}
+
+\end{document}
